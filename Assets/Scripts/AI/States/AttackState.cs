@@ -7,5 +7,6 @@ public class AttackState : State
     public override State RunCurrentState()
     {
       Debug.Log("AttackState");
+      return null;
     }
 }
