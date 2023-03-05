@@ -5,8 +5,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public Rigidbody rb;
-    public GameObject camHolder;
+    private Rigidbody rb;
     public float speed = 5f, sensitiviy = 0.1f, maxForce = 1f;
     Vector2 move, look;
     float lookRotation;
