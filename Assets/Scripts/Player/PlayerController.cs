@@ -1,45 +1,70 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class InputReader : MonoBehaviour, Controls.IPlayerActions
 {
+    public Vector2 MouseDelta;
+    public Vector2 MoveComposite;
+    public Action OnJumpPerformed;
+    public int speed = 10;
+
+    private Controls controls;
     private Rigidbody rb;
-    public float speed = 5f, sensitiviy = 0.1f, maxForce = 1f;
-    Vector2 move, look;
-    float lookRotation;
+
+    private void OnEnable()
+    {
+        if (controls != null)
+            return;
+
+        controls = new Controls();
+        controls.Player.SetCallbacks(this);
+        controls.Player.Enable();
+    }
+
+    public void OnDisable()
+    {
+        controls.Player.Disable();
+    }
+
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        MouseDelta = context.ReadValue<Vector2>();
+    }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        move = context.ReadValue<Vector2>();
-    }
-    
-    public void OnLook(InputAction.CallbackContext context)
-    {
-        look = context.ReadValue<Vector2>();
+        MoveComposite = context.ReadValue<Vector2>();
     }
 
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        OnJumpPerformed?.Invoke();
+    }
+
+
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        throw new NotImplementedException();
+    }
+
+    
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        rb = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate() 
+    void FixedUpdate()
     {
-        // Find target velocity
-        Vector3 currentVelocity = rb.velocity;
-        Vector3 targetVelocity = new Vector3(move.x, 0, move.y) * speed;
-
-        // Align direction
-        targetVelocity = transform.TransformDirection(targetVelocity);
-
-        // Calculate forces
-        Vector3 velocityChange = (targetVelocity - currentVelocity);
-
-        // Limit force
-        Vector3.ClampMagnitude(velocityChange, maxForce);
-
-        rb.AddForce(velocityChange, ForceMode.VelocityChange);
+        rb.AddForce(MoveComposite * speed);
     }
+
+
+
+
+
+
 }
